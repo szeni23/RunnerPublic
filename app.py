@@ -22,6 +22,9 @@ def load_temperature_data():
 
 data = load_temperature_data()
 
+if st.button('Reload Data'):
+    rerun()
+
 if not data.empty:
     # Plot the data
     fig = px.line(data, x='Date', y='Temp',
