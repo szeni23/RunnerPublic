@@ -29,12 +29,12 @@ if 'last_update' not in st.session_state or time.time() - st.session_state['last
     st.experimental_rerun()
 
 if not data.empty:
-    # Plotting the data
+    # Set the style
     sns.set_theme(style="whitegrid")
+
+    # Create the plot
     plt.figure(figsize=(10, 6))
     sns.lineplot(x='Date', y='Temp', data=data, marker='o', color='dodgerblue', label='Daily Temperature')
-    
-    # Adding Rico's convenience water temp line
     plt.axhline(17, color='red', lw=2, ls='--', label="Rico's convenience water temp line")
     
     plt.title('Temperature Trend at 3-Weihern', fontsize=16)
