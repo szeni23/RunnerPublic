@@ -2,7 +2,7 @@ name: Daily Temperature Fetch
 
 on:
   schedule:
-      - cron: '46 13 * * *'
+    - cron: '*/5 * * * *'
 
 
 permissions:
