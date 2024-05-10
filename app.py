@@ -29,7 +29,7 @@ data = load_temperature_data()
 # Initialize or update the last update time in session state
 if 'last_update' not in st.session_state or time.time() - st.session_state['last_update'] > 300:
     st.session_state['last_update'] = time.time()
-    st.experimental_rerun()
+    st.rerun()
 
 if not data.empty:
     sns.set_theme(style="whitegrid")
@@ -43,9 +43,48 @@ if not data.empty:
     todays_data = data[data['Date'].dt.date == today]
     if not todays_data.empty:
         todays_temp = todays_data['Temp'].values[0]
-        st.markdown(f"**Today's water temperature is: {todays_temp} °C**")
+        st.subheader(f"Weather in St.Gallen:")
+        st.markdown(f"**Today's water temperature is: {{todays_temp} °C")
+
+        
     else:
         st.markdown("**Today's water temperature is not available.**")
+
+def fetch_weather_data(api_key, city):
+    base_url = "http://api.openweathermap.org/data/2.5/weather"
+    params = {
+        'q': city,
+        'appid': api_key,
+        'units': 'metric'
+    }
+    response = requests.get(base_url, params=params)
+    return response.json()
+
+city = 'St. Gallen'
+api_key = os.getenv('OPENWEATHER_API_KEY')
+if not api_key:
+    st.error('API key not found. Please set the OPENWEATHER_API_KEY environment variable.')
+    st.stop()
+    
+weather_data = fetch_weather_data(api_key, city)
+
+if 'main' in weather_data:
+    st.write(f"**Temperature:** {weather_data['main']['temp']} °C")
+    st.write(f"**Weather:** {weather_data['weather'][0]['description']}")
+    st.write(f"**Humidity:** {weather_data['main']['humidity']}%")
+    st.write(f"**Wind Speed:** {weather_data['wind']['speed']} m/s")
+else:
+    if 'message' in weather_data:
+        st.error(f"Error fetching weather data: {weather_data['message']}")
+    else:
+        st.error("Error fetching weather data. Please check your API key and the city name.")
+
+
+st.markdown(
+    "For more detailed information, visit "
+    "[Tagesaktuelle Öffnungszeiten und Temperaturen der Freibäder]"
+    "(https://www.sport.stadt.sg.ch/news/stsg_sport/2024/05/freibaeder--tagesaktuelle-oeffnungszeiten-und-temperaturen.html)."
+)
     
     plt.title('Temperature Trend at 3-Weihern', fontsize=16)
     plt.xlabel('Date', fontsize=14)
@@ -94,40 +133,3 @@ if not data.empty:
     
 else:
     st.markdown("No data available to display.")
-
-def fetch_weather_data(api_key, city):
-    base_url = "http://api.openweathermap.org/data/2.5/weather"
-    params = {
-        'q': city,
-        'appid': api_key,
-        'units': 'metric'
-    }
-    response = requests.get(base_url, params=params)
-    return response.json()
-
-city = 'St. Gallen'
-api_key = os.getenv('OPENWEATHER_API_KEY')
-if not api_key:
-    st.error('API key not found. Please set the OPENWEATHER_API_KEY environment variable.')
-    st.stop()
-    
-weather_data = fetch_weather_data(api_key, city)
-
-if 'main' in weather_data:
-    st.subheader(f"Weather in {city}:")
-    st.write(f"**Temperature:** {weather_data['main']['temp']} °C")
-    st.write(f"**Weather:** {weather_data['weather'][0]['description']}")
-    st.write(f"**Humidity:** {weather_data['main']['humidity']}%")
-    st.write(f"**Wind Speed:** {weather_data['wind']['speed']} m/s")
-else:
-    if 'message' in weather_data:
-        st.error(f"Error fetching weather data: {weather_data['message']}")
-    else:
-        st.error("Error fetching weather data. Please check your API key and the city name.")
-
-
-st.markdown(
-    "For more detailed information, visit "
-    "[Tagesaktuelle Öffnungszeiten und Temperaturen der Freibäder]"
-    "(https://www.sport.stadt.sg.ch/news/stsg_sport/2024/05/freibaeder--tagesaktuelle-oeffnungszeiten-und-temperaturen.html)."
-)
