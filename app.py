@@ -19,6 +19,11 @@ def load_temperature_data():
         st.error(f"Error loading data: {e}")
         return pd.DataFrame()
 
+if st.button('Refresh Data'):
+    st.experimental_rerun()
+
+
+
 data = load_temperature_data()
 
 # Plot the data
