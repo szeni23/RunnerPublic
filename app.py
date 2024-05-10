@@ -47,6 +47,40 @@ if not data.empty:
     
     st.pyplot(plt)
 
+    window_size = 7  # 7-day moving average
+    data['Moving Average'] = data['Temp'].rolling(window=window_size, min_periods=1).mean()
+
+    # Set the style for plots
+    sns.set_theme(style="whitegrid")
+    
+    # Create the Moving Average plot
+    plt.figure(figsize=(12, 6))
+    plt.plot(data['Date'], data['Temp'], marker='o', linestyle='', color='dodgerblue', label='Daily Temperature')
+    plt.plot(data['Date'], data['Moving Average'], color='red', label=f'{window_size}-Day Moving Average')
+
+    plt.title('Temperature Trend with Moving Average', fontsize=16)
+    plt.xlabel('Date', fontsize=14)
+    plt.ylabel('Temperature (°C)', fontsize=14)
+    plt.xticks(rotation=45)
+    plt.ylim(0, 30)
+    plt.legend()
+    plt.tight_layout()
+    st.pyplot(plt)
+
+    # Heat Map of Temperature by Day and Month
+    data['Month'] = data['Date'].dt.month_name()
+    data['Day'] = data['Date'].dt.day
+    heat_data = data.pivot_table(index='Month', columns='Day', values='Temp', aggfunc='mean')
+
+    plt.figure(figsize=(20, 6))
+    sns.heatmap(heat_data, cmap='coolwarm', linewidths=.5, annot=True, fmt=".1f", cbar_kws={'label': 'Temperature (°C)'})
+    plt.title('Heat Map of Daily Temperatures by Month', fontsize=16)
+    plt.xlabel('Day of Month', fontsize=14)
+    plt.ylabel('Month', fontsize=14)
+    plt.yticks(rotation=0)
+    plt.tight_layout()
+    st.pyplot(plt)
+
     # Find today's date and the corresponding temperature
     today = datetime.now().date()
     todays_data = data[data['Date'].dt.date == today]
