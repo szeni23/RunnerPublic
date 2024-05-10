@@ -1,11 +1,14 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objs as go
+import matplotlib.pyplot as plt
+import seaborn as sns
 from datetime import datetime, timedelta
 import time
 
 st.title('Daily Temperature Tracker 3-Weihern')
+
+# Set the style of seaborn
+sns.set_theme(style="whitegrid")
 
 # Function to load temperature data
 def load_temperature_data():
@@ -22,7 +25,6 @@ def load_temperature_data():
 # Load the temperature data
 data = load_temperature_data()
 
-
 # Initialize or update the last update time in session state
 if 'last_update' not in st.session_state:
     st.session_state['last_update'] = time.time()
@@ -31,52 +33,31 @@ if 'last_update' not in st.session_state:
 current_time = time.time()
 if current_time - st.session_state['last_update'] > 300:
     st.session_state['last_update'] = current_time
-    st.rerun()
+    st.experimental_rerun()
 
 if not data.empty:
-    # Plot the data
-    fig = px.line(data, x='Date', y='Temp',
-                  title='Temperature Trend',
-                  labels={'Temp': 'Temperature (°C)', 'Date': 'Date'},
-                  markers=True)
-
-    fig.update_layout(
-        autosize=True,
-        margin=dict(l=50, r=50, t=50, b=50),
-        template="plotly_white",
-        yaxis=dict(range=[0, 30]),
-        xaxis=dict(
-            tickformat="%d %b %Y",
-            dtick="D1",
-            tickangle=-45,
-        ),
-        shapes=[
-            go.layout.Shape(
-                type="line",
-                x0=data['Date'].min(),
-                y0=17,
-                x1=data['Date'].max(),
-                y1=17,
-                line=dict(
-                    color="Red",
-                    width=2,
-                    dash="dot",
-                ),
-            )
-        ]
-    )
-
-    fig.add_annotation(
-        x=data['Date'].max(),
-        y=17,
-        text="Rico's convenience water temp line",
-        showarrow=True,
-        arrowhead=1,
-        ax=0,
-        ay=-40
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
+    # Plot the data using Matplotlib and Seaborn
+    plt.figure(figsize=(10, 6))
+    
+    # Plotting the temperature trend
+    sns.lineplot(x='Date', y='Temp', data=data, marker='o', color='dodgerblue', label='Daily Temperature')
+    
+    # Adding a horizontal line for Rico's convenience water temp line
+    plt.axhline(17, color='red', lw=2, ls='--', label="Rico's convenience water temp line")
+    
+    # Enhancing the plot with titles, labels, and a legend
+    plt.title('Temperature Trend at 3-Weihern', fontsize=16)
+    plt.xlabel('Date', fontsize=14)
+    plt.ylabel('Temperature (°C)', fontsize=14)
+    plt.xticks(rotation=45)
+    plt.ylim(0, 30)
+    plt.legend()
+    
+    # Tight layout for better spacing
+    plt.tight_layout()
+    
+    # Display the plot
+    st.pyplot(plt)
 
     st.markdown(
         "For more detailed information, visit "
