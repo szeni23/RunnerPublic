@@ -95,8 +95,8 @@ else:
     st.markdown("No data available to display.")
 
 
-    st.markdown(
-        "For more detailed information, visit "
-        "[Tagesaktuelle Öffnungszeiten und Temperaturen der Freibäder]"
-        "(https://www.sport.stadt.sg.ch/news/stsg_sport/2024/05/freibaeder--tagesaktuelle-oeffnungszeiten-und-temperaturen.html)."
-    )
+st.markdown(
+    "For more detailed information, visit "
+    "[Tagesaktuelle Öffnungszeiten und Temperaturen der Freibäder]"
+    "(https://www.sport.stadt.sg.ch/news/stsg_sport/2024/05/freibaeder--tagesaktuelle-oeffnungszeiten-und-temperaturen.html)."
+)
