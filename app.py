@@ -4,7 +4,6 @@ import plotly.express as px
 import plotly.graph_objs as go
 from datetime import datetime, timedelta
 import time
-from streamlit.runtime import rerun
 
 st.title('Daily Temperature Tracker 3-Weihern')
 
