@@ -79,7 +79,7 @@ if not data.empty:
             st.error("Error fetching weather data. Please check your API key and the city name.")
     
     
-    plt.title('Temperature Trend at 3-Weihern', fontsize=16)
+    plt.title('Water Temperature Trend at 3-Weihern', fontsize=16)
     plt.xlabel('Date', fontsize=14)
     plt.ylabel('Temperature (°C)', fontsize=14)
     plt.xticks(data['Date'], data['Date'].dt.strftime('%d %b %Y'), rotation=45)
@@ -100,7 +100,7 @@ if not data.empty:
     plt.plot(data['Date'], data['Temp'], marker='o', linestyle='', color='dodgerblue', label='Daily Temperature')
     plt.plot(data['Date'], data['Moving Average'], color='red', label=f'{window_size}-Day Moving Average')
 
-    plt.title('Temperature Trend with Moving Average', fontsize=16)
+    plt.title('Water Temperature Trend with Moving Average', fontsize=16)
     plt.xlabel('Date', fontsize=14)
     plt.ylabel('Temperature (°C)', fontsize=14)
     plt.xticks(data['Date'], data['Date'].dt.strftime('%d %b %Y'), rotation=45)
@@ -116,7 +116,7 @@ if not data.empty:
     plt.figure(figsize=(20, 6))
     sns.heatmap(heat_data, cmap='coolwarm', linewidths=.5, annot=True, fmt=".1f",
                 cbar_kws={'label': 'Temperature (°C)'}, vmin=0, vmax=30)
-    plt.title('Heat Map of Daily Temperatures by Month', fontsize=16)
+    plt.title('Heat Map of Daily Water Temperatures by Month', fontsize=16)
     plt.xlabel('Day of Month', fontsize=14)
     plt.ylabel('Month', fontsize=14)
     plt.yticks(rotation=0)
