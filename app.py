@@ -2,13 +2,10 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from datetime import datetime, timedelta
+from datetime import datetime
 import time
 
 st.title('Daily Temperature Tracker 3-Weihern')
-
-# Set the style of seaborn
-sns.set_theme(style="whitegrid")
 
 # Function to load temperature data
 def load_temperature_data():
@@ -16,8 +13,9 @@ def load_temperature_data():
     try:
         data = pd.read_csv(url, dayfirst=True)
         data['Date'] = pd.to_datetime(data['Date'], format='%d.%m.%Y')
-        data = data.sort_values(by='Date')
-        return data
+        # Ensure each date has only one data point, for safety
+        data = data.drop_duplicates(subset='Date', keep='first')
+        return data.sort_values(by='Date')
     except Exception as e:
         st.error(f"Error loading data: {e}")
         return pd.DataFrame()
@@ -26,38 +24,38 @@ def load_temperature_data():
 data = load_temperature_data()
 
 # Initialize or update the last update time in session state
-if 'last_update' not in st.session_state:
+if 'last_update' not in st.session_state or time.time() - st.session_state['last_update'] > 300:
     st.session_state['last_update'] = time.time()
-
-# Check if it's time to reload data (automatically every 300 seconds / 5 minutes)
-current_time = time.time()
-if current_time - st.session_state['last_update'] > 300:
-    st.session_state['last_update'] = current_time
     st.experimental_rerun()
 
 if not data.empty:
-    # Plot the data using Matplotlib and Seaborn
+    # Plotting the data
+    sns.set_theme(style="whitegrid")
     plt.figure(figsize=(10, 6))
-    
-    # Plotting the temperature trend
     sns.lineplot(x='Date', y='Temp', data=data, marker='o', color='dodgerblue', label='Daily Temperature')
     
-    # Adding a horizontal line for Rico's convenience water temp line
+    # Adding Rico's convenience water temp line
     plt.axhline(17, color='red', lw=2, ls='--', label="Rico's convenience water temp line")
     
-    # Enhancing the plot with titles, labels, and a legend
     plt.title('Temperature Trend at 3-Weihern', fontsize=16)
     plt.xlabel('Date', fontsize=14)
     plt.ylabel('Temperature (°C)', fontsize=14)
     plt.xticks(rotation=45)
     plt.ylim(0, 30)
     plt.legend()
-    
-    # Tight layout for better spacing
     plt.tight_layout()
     
-    # Display the plot
     st.pyplot(plt)
+
+    # Find today's date and the corresponding temperature
+    today = datetime.now().date()
+    todays_data = data[data['Date'].dt.date == today]
+
+    if not todays_data.empty:
+        todays_temp = todays_data['Temp'].values[0]
+        st.markdown(f"**Today's water temperature is: {todays_temp} °C**")
+    else:
+        st.markdown("**Today's water temperature is not available.**")
 
     st.markdown(
         "For more detailed information, visit "
