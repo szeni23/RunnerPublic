@@ -36,6 +36,21 @@ if not data.empty:
     plt.figure(figsize=(10, 6))
     sns.lineplot(x='Date', y='Temp', data=data, marker='o', color='dodgerblue', label='Daily Temperature')
     plt.axhline(17, color='red', lw=2, ls='--', label="Rico's comfort water temperature line")
+
+    today = datetime.now().date()
+    todays_data = data[data['Date'].dt.date == today]
+
+    if not todays_data.empty:
+        todays_temp = todays_data['Temp'].values[0]
+        st.markdown(f"**Today's water temperature is: {todays_temp} °C**")
+    else:
+        st.markdown("**Today's water temperature is not available.**")
+
+    st.markdown(
+        "For more detailed information, visit "
+        "[Tagesaktuelle Öffnungszeiten und Temperaturen der Freibäder]"
+        "(https://www.sport.stadt.sg.ch/news/stsg_sport/2024/05/freibaeder--tagesaktuelle-oeffnungszeiten-und-temperaturen.html)."
+    )
     
     plt.title('Temperature Trend at 3-Weihern', fontsize=16)
     plt.xlabel('Date', fontsize=14)
@@ -81,20 +96,6 @@ if not data.empty:
     plt.tight_layout()
     st.pyplot(plt)
 
-    # Find today's date and the corresponding temperature
-    today = datetime.now().date()
-    todays_data = data[data['Date'].dt.date == today]
-
-    if not todays_data.empty:
-        todays_temp = todays_data['Temp'].values[0]
-        st.markdown(f"**Today's water temperature is: {todays_temp} °C**")
-    else:
-        st.markdown("**Today's water temperature is not available.**")
-
-    st.markdown(
-        "For more detailed information, visit "
-        "[Tagesaktuelle Öffnungszeiten und Temperaturen der Freibäder]"
-        "(https://www.sport.stadt.sg.ch/news/stsg_sport/2024/05/freibaeder--tagesaktuelle-oeffnungszeiten-und-temperaturen.html)."
-    )
+    
 else:
     st.markdown("No data available to display.")
