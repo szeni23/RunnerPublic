@@ -1,9 +1,8 @@
 name: Daily Temperature Fetch
 
 on:
-  workflow_dispatch:
   schedule:
-      - cron: '40 13 * * *'
+      - cron: '46 13 * * *'
 
 
 permissions:
