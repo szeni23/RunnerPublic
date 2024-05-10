@@ -44,7 +44,9 @@ if not data.empty:
     if not todays_data.empty:
         todays_temp = todays_data['Temp'].values[0]
         st.subheader(f"Weather in St.Gallen:")
-        st.write(f"**Today's water temperature is:** {{todays_temp} °C")
+        st.write(f"**Today's water temperature is:** {todays_temp} °C")
+
+
 
 
 
