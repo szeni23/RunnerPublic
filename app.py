@@ -25,7 +25,7 @@ data = load_temperature_data()
 
 # Button for manual data refresh
 if st.button('Reload Data'):
-    rerun()
+    st.rerun()
 
 # Initialize or update the last update time in session state
 if 'last_update' not in st.session_state:
