@@ -20,7 +20,7 @@ def load_temperature_data():
         st.error(f"Error loading data: {e}")
         return pd.DataFrame()
 
-data = load_data()
+data = load_temperature_data()
 
 # Plot the data
 fig = px.line(data, x='Date', y='Temp',
