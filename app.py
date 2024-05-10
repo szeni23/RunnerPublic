@@ -34,7 +34,7 @@ if 'last_update' not in st.session_state:
 current_time = time.time()
 if current_time - st.session_state['last_update'] > 300:
     st.session_state['last_update'] = current_time
-    rerun()
+    st.rerun()
 
 if not data.empty:
     # Plot the data
