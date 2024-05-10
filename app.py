@@ -8,11 +8,6 @@ import pytz
 
 st.title('Daily Temperature Tracker 3-Weihern ')
 
-def is_time_to_update():
-    zurich = pytz.timezone('Europe/Zurich')
-    current_time = datetime.now(zurich).time()
-    target_time = time(13, 20)
-    return current_time >= target_time and current_time <= (datetime.combine(datetime.today(), target_time) + timedelta(minutes=1)).time()
     
 @st.cache_data
 def load_data():
@@ -22,12 +17,6 @@ def load_data():
     return data
 
 data = load_data()
-
-if st.button('Update Data Now'):
-    st.experimental_rerun()
-
-if is_time_to_update():
-    st.experimental_rerun()
 
 # Plot the data
 fig = px.line(data, x='Date', y='Temp',
