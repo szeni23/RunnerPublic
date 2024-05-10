@@ -6,6 +6,7 @@ from datetime import datetime, time, timedelta
 import pytz
 
 st.title('Daily Temperature Tracker 3-Weihern')
+st.title('Daily Temperature Tracker 3-Weihern')
 
 def load_temperature_data():
     # URL to the raw CSV file in the GitHub repository
