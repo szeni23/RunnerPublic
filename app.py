@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import datetime
 import time
+import os
+
 
 st.title('Daily Temperature Tracker 3-Weihern')
 
