@@ -45,12 +45,6 @@ if not data.empty:
         st.markdown(f"**Today's water temperature is: {todays_temp} °C**")
     else:
         st.markdown("**Today's water temperature is not available.**")
-
-    st.markdown(
-        "For more detailed information, visit "
-        "[Tagesaktuelle Öffnungszeiten und Temperaturen der Freibäder]"
-        "(https://www.sport.stadt.sg.ch/news/stsg_sport/2024/05/freibaeder--tagesaktuelle-oeffnungszeiten-und-temperaturen.html)."
-    )
     
     plt.title('Temperature Trend at 3-Weihern', fontsize=16)
     plt.xlabel('Date', fontsize=14)
@@ -99,3 +93,10 @@ if not data.empty:
     
 else:
     st.markdown("No data available to display.")
+
+
+    st.markdown(
+        "For more detailed information, visit "
+        "[Tagesaktuelle Öffnungszeiten und Temperaturen der Freibäder]"
+        "(https://www.sport.stadt.sg.ch/news/stsg_sport/2024/05/freibaeder--tagesaktuelle-oeffnungszeiten-und-temperaturen.html)."
+    )
