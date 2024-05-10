@@ -29,17 +29,15 @@ if 'last_update' not in st.session_state or time.time() - st.session_state['last
     st.experimental_rerun()
 
 if not data.empty:
-    # Set the style
     sns.set_theme(style="whitegrid")
-
-    # Create the plot
     plt.figure(figsize=(10, 6))
+    
     sns.lineplot(x='Date', y='Temp', data=data, marker='o', color='dodgerblue', label='Daily Temperature')
+    plt.fill_between(data['Date'], data['Temp'] - 1, data['Temp'] + 1, color='dodgerblue', alpha=0.3)
     plt.axhline(17, color='red', lw=2, ls='--', label="Rico's comfort water temperature line")
-
+    
     today = datetime.now().date()
     todays_data = data[data['Date'].dt.date == today]
-
     if not todays_data.empty:
         todays_temp = todays_data['Temp'].values[0]
         st.markdown(f"**Today's water temperature is: {todays_temp} °C**")
@@ -76,13 +74,13 @@ if not data.empty:
     plt.tight_layout()
     st.pyplot(plt)
 
-    # Heat Map of Temperature by Day and Month
     data['Month'] = data['Date'].dt.month_name()
     data['Day'] = data['Date'].dt.day
     heat_data = data.pivot_table(index='Month', columns='Day', values='Temp', aggfunc='mean')
-
+    
     plt.figure(figsize=(20, 6))
-    sns.heatmap(heat_data, cmap='coolwarm', linewidths=.5, annot=True, fmt=".1f", cbar_kws={'label': 'Temperature (°C)'})
+    sns.heatmap(heat_data, cmap='coolwarm', linewidths=.5, annot=True, fmt=".1f",
+                cbar_kws={'label': 'Temperature (°C)'}, vmin=0, vmax=30)
     plt.title('Heat Map of Daily Temperatures by Month', fontsize=16)
     plt.xlabel('Day of Month', fontsize=14)
     plt.ylabel('Month', fontsize=14)
