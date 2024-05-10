@@ -92,6 +92,36 @@ if not data.empty:
 else:
     st.markdown("No data available to display.")
 
+def fetch_weather_data(api_key, city):
+    base_url = "http://api.openweathermap.org/data/2.5/weather"
+    params = {
+        'q': city,
+        'appid': api_key,
+        'units': 'metric'
+    }
+    response = requests.get(base_url, params=params)
+    return response.json()
+
+city = 'St. Gallen'
+api_key = os.getenv('OPENWEATHER_API_KEY')
+if not api_key:
+    st.error('API key not found. Please set the OPENWEATHER_API_KEY environment variable.')
+    st.stop()
+    
+weather_data = fetch_weather_data(api_key, city)
+
+if 'main' in weather_data:
+    st.subheader(f"Weather in {city}:")
+    st.write(f"**Temperature:** {weather_data['main']['temp']} °C")
+    st.write(f"**Weather:** {weather_data['weather'][0]['description']}")
+    st.write(f"**Humidity:** {weather_data['main']['humidity']}%")
+    st.write(f"**Wind Speed:** {weather_data['wind']['speed']} m/s")
+else:
+    if 'message' in weather_data:
+        st.error(f"Error fetching weather data: {weather_data['message']}")
+    else:
+        st.error("Error fetching weather data. Please check your API key and the city name.")
+
 
 st.markdown(
     "For more detailed information, visit "
