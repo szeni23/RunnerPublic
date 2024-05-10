@@ -70,7 +70,7 @@ if not data.empty:
     plt.title('Temperature Trend with Moving Average', fontsize=16)
     plt.xlabel('Date', fontsize=14)
     plt.ylabel('Temperature (°C)', fontsize=14)
-    plt.xticks(rotation=45)
+    plt.xticks(data['Date'], data['Date'].dt.strftime('%d %b %Y'), rotation=45)
     plt.ylim(0, 30)
     plt.legend()
     plt.tight_layout()
