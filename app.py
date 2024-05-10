@@ -8,7 +8,6 @@ import pytz
 
 st.title('Daily Temperature Tracker 3-Weihern ')
 
-@st.cache_data(ttl=60)  
 def load_temperature_data():
     # URL to the raw CSV file in the GitHub repository
     url = 'https://raw.githubusercontent.com/szeni23/runnerPublic/main/temperature_data.csv'
