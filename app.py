@@ -5,19 +5,6 @@ import plotly.graph_objs as go
 from datetime import datetime, time, timedelta
 import pytz
 
-def should_rerun(last_rerun_time, interval_seconds=10):
-    current_time = time.time()
-    return (current_time - last_rerun_time) > interval_seconds
-
-# Store the last rerun time in a session state if not already stored
-if 'last_rerun_time' not in st.session_state:
-    st.session_state['last_rerun_time'] = time.time()
-
-# Automatically rerun the app if needed
-if should_rerun(st.session_state['last_rerun_time']):
-    st.session_state['last_rerun_time'] = time.time()
-    st.rerun()
-
 st.title('Daily Temperature Tracker 3-Weihern ')
 
 def load_temperature_data():
