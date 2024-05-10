@@ -35,7 +35,7 @@ if not data.empty:
     # Create the plot
     plt.figure(figsize=(10, 6))
     sns.lineplot(x='Date', y='Temp', data=data, marker='o', color='dodgerblue', label='Daily Temperature')
-    plt.axhline(17, color='red', lw=2, ls='--', label="Rico's convenience water temp line")
+    plt.axhline(17, color='red', lw=2, ls='--', label="Rico's comfort water temperature line")
     
     plt.title('Temperature Trend at 3-Weihern', fontsize=16)
     plt.xlabel('Date', fontsize=14)
