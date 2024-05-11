@@ -8,7 +8,7 @@ import os
 import requests
 
 
-st.title('Daily Temperature Tracker 3-Weihern')
+st.title('Daily Temperature Tracker 3-Weieren')
 
 # Function to load temperature data
 def load_temperature_data():
