@@ -127,13 +127,26 @@ if not data.empty:
 else:
     st.markdown("No data available to display.")
     
-latitude = float(st.secrets['LATITUDE'])
-longitude = float(st.secrets['LONGITUDE'])
+def get_coordinate(key, default_value):
+    try:
+        # Try to retrieve and convert the coordinate
+        return float(st.secrets[key])
+    except (KeyError, TypeError, ValueError):
+        # Log an error message and use the default if conversion fails
+        st.error(f"Error converting {key} to float. Using default value: {default_value}")
+        return default_value
 
+# Retrieve coordinates using the helper function
+latitude = get_coordinate('LATITUDE', 47.385070)  # Default to some valid latitude if not found
+longitude = get_coordinate('LONGITUDE', 8.486234)  # Default to some valid longitude if not found
+
+# Create a DataFrame with the latitude and longitude
 data = pd.DataFrame({
     'lat': [latitude],
     'lon': [longitude]
 })
+
+# Display the map
 st.map(data)
 
     
