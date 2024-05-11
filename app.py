@@ -128,8 +128,8 @@ else:
     st.markdown("No data available to display.")
     
 data = pd.DataFrame({
-    'lat': [latitude],
-    'lon': [longitude]
+    'lat': [LATITUDE],
+    'lon': [LONGITUDE]
 })
 
 st.map(data)
