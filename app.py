@@ -79,7 +79,7 @@ if not data.empty:
             st.error("Error fetching weather data. Please check your API key and the city name.")
     
     
-    plt.title('Water Temperature Trend at 3-Weihern', fontsize=16)
+    plt.title('Water Temperature Trend at 3-Weieren', fontsize=16)
     plt.xlabel('Date', fontsize=14)
     plt.ylabel('Temperature (°C)', fontsize=14)
     plt.xticks(data['Date'], data['Date'].dt.strftime('%d %b %Y'), rotation=45)
@@ -127,13 +127,14 @@ if not data.empty:
 else:
     st.markdown("No data available to display.")
     
+latitude = float(st.secrets['LATITUDE'])
+longitude = float(st.secrets['LONGITUDE'])
+
 data = pd.DataFrame({
-    'lat': 'LATITUDE',
-    'lon': 'LONGITUDE'
+    'lat': [latitude],
+    'lon': [longitude]
 })
-
 st.map(data)
-
 
     
 st.markdown(
