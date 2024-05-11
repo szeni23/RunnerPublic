@@ -136,17 +136,16 @@ def get_coordinate(key, default_value):
         st.error(f"Error converting {key} to float. Using default value: {default_value}")
         return default_value
 
-# Retrieve coordinates using the helper function
-latitude = get_coordinate('LATITUDE', 47.385070)  # Default to some valid latitude if not found
-longitude = get_coordinate('LONGITUDE', 8.486234)  # Default to some valid longitude if not found
+latitude = 47.385070
+longitude = 8.486234
 
-# Create a DataFrame with the latitude and longitude
+# Create a DataFrame with these coordinates
 data = pd.DataFrame({
     'lat': [latitude],
     'lon': [longitude]
 })
 
-# Display the map
+# Display the map with the DataFrame
 st.map(data)
 
     
