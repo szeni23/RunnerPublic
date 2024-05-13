@@ -127,14 +127,7 @@ if not data.empty:
 else:
     st.markdown("No data available to display.")
     
-def get_coordinate(key, default_value):
-    try:
-        # Try to retrieve and convert the coordinate
-        return float(st.secrets[key])
-    except (KeyError, TypeError, ValueError):
-        # Log an error message and use the default if conversion fails
-        st.error(f"Error converting {key} to float. Using default value: {default_value}")
-        return default_value
+
 
 latitude = 47.42163
 longitude = 9.386448
