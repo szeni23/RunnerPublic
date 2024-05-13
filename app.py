@@ -136,6 +136,7 @@ data = pd.DataFrame({
     'lat': [latitude],
     'lon': [longitude]
 })
+st.map(data)
 
     
 st.markdown(
