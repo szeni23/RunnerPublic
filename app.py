@@ -136,8 +136,27 @@ data = pd.DataFrame({
     'lat': [latitude],
     'lon': [longitude]
 })
-st.map(data)
+view = pdk.ViewState(
+    latitude=latitude,
+    longitude=longitude,
+    zoom=14,  # You can adjust the zoom level here
+    pitch=0
+)
 
+# Create the map layer
+layer = pdk.Layer(
+    'ScatterplotLayer',
+    data,
+    get_position='[lon, lat]',
+    get_radius=100,  # Radius of the data point
+    get_color=[255, 0, 0, 160],  # Color of the data point
+)
+
+# Render the map
+st.pydeck_chart(pdk.Deck(
+    layers=[layer],
+    initial_view_state=view
+))
     
 st.markdown(
     "For more detailed information, visit "
