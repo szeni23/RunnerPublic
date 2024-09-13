@@ -6,27 +6,24 @@ from datetime import datetime
 import time
 import os
 import requests
-
+import matplotlib.dates as mdates
+from calendar import month_name
 
 st.title('Daily Temperature Tracker 3-Weieren')
 
-# Function to load temperature data
 def load_temperature_data():
     url = 'https://raw.githubusercontent.com/szeni23/runnerPublic/main/temperature_data.csv'
     try:
         data = pd.read_csv(url, dayfirst=True)
         data['Date'] = pd.to_datetime(data['Date'], format='%d.%m.%Y')
-        # Ensure each date has only one data point, for safety
         data = data.drop_duplicates(subset='Date', keep='first')
         return data.sort_values(by='Date')
     except Exception as e:
         st.error(f"Error loading data: {e}")
         return pd.DataFrame()
 
-# Load the temperature data
 data = load_temperature_data()
 
-# Initialize or update the last update time in session state
 if 'last_update' not in st.session_state or time.time() - st.session_state['last_update'] > 300:
     st.session_state['last_update'] = time.time()
     st.rerun()
@@ -45,7 +42,6 @@ if not data.empty:
         todays_temp = todays_data['Temp'].values[0]
         st.subheader(f"Weather in St.Gallen:")
         st.write(f"**Today's water temperature is:** {todays_temp} °C")
-
     else:
         st.markdown("**Today's water temperature is not available.**")
 
@@ -78,38 +74,42 @@ if not data.empty:
         else:
             st.error("Error fetching weather data. Please check your API key and the city name.")
     
-    
     plt.title('Water Temperature Trend at 3-Weieren', fontsize=16)
     plt.xlabel('Date', fontsize=14)
     plt.ylabel('Temperature (°C)', fontsize=14)
-    plt.xticks(data['Date'], data['Date'].dt.strftime('%d %b %Y'), rotation=45)
+    ax = plt.gca()
+    locator = mdates.MonthLocator()
+    formatter = mdates.DateFormatter('%b %Y')
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(formatter)
+    plt.xticks(rotation=45)
     plt.ylim(0, 30)
     plt.legend()
     plt.tight_layout()
-    
     st.pyplot(plt)
 
-    window_size = 7  # 7-day moving average
+    window_size = 7
     data['Moving Average'] = data['Temp'].rolling(window=window_size, min_periods=1).mean()
-
-    # Set the style for plots
-    sns.set_theme(style="whitegrid")
     
-    # Create the Moving Average plot
     plt.figure(figsize=(12, 6))
     plt.plot(data['Date'], data['Temp'], marker='o', linestyle='', color='dodgerblue', label='Daily Temperature')
     plt.plot(data['Date'], data['Moving Average'], color='red', label=f'{window_size}-Day Moving Average')
-
     plt.title('Water Temperature Trend with Moving Average', fontsize=16)
     plt.xlabel('Date', fontsize=14)
     plt.ylabel('Temperature (°C)', fontsize=14)
-    plt.xticks(data['Date'], data['Date'].dt.strftime('%d %b %Y'), rotation=45)
+    ax = plt.gca()
+    locator = mdates.MonthLocator()
+    formatter = mdates.DateFormatter('%b %Y')
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(formatter)
+    plt.xticks(rotation=45)
     plt.ylim(0, 30)
     plt.legend()
     plt.tight_layout()
     st.pyplot(plt)
 
-    data['Month'] = data['Date'].dt.month_name()
+    month_names = list(month_name)[1:]
+    data['Month'] = pd.Categorical(data['Date'].dt.month_name(), categories=month_names, ordered=True)
     data['Day'] = data['Date'].dt.day
     heat_data = data.pivot_table(index='Month', columns='Day', values='Temp', aggfunc='mean')
     
@@ -122,12 +122,8 @@ if not data.empty:
     plt.yticks(rotation=0)
     plt.tight_layout()
     st.pyplot(plt)
-
-    
 else:
     st.markdown("No data available to display.")
-    
-
 
 latitude = 47.42163
 longitude = 9.386448
@@ -137,7 +133,6 @@ data = pd.DataFrame({
     'lon': [longitude]
 })
 st.map(data)
-
     
 st.markdown(
     "For more detailed information, visit "
