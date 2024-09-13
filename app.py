@@ -34,7 +34,6 @@ if not data.empty:
     
     sns.lineplot(x='Date', y='Temp', data=data, marker='o', color='dodgerblue', label='Daily Temperature')
     plt.fill_between(data['Date'], data['Temp'] - 1, data['Temp'] + 1, color='dodgerblue', alpha=0.3)
-    plt.axhline(17, color='red', lw=2, ls='--', label="Rico's comfort water temperature line")
     
     today = datetime.now().date()
     todays_data = data[data['Date'].dt.date == today]
