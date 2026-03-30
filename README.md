@@ -1,8 +1,32 @@
-# runnerPublic
+# St.Gallen Bäder Dashboard
 
-Website to track the temperature of the 3 weieren in St.Gallen
-(scrapes data from the the Canton St.Gallen - thanks)
+A Streamlit dashboard for current and historical water temperatures in St.Gallen public baths.
 
-https://3weieren.streamlit.app/
+The app now reads directly from the official Open Data API instead of scraping HTML pages or relying on committed CSV snapshots.
 
-![image](https://github.com/user-attachments/assets/7d3d8d7a-2366-4fcb-b16b-8fdf62b7ccd1)
+## Data source
+
+- Dataset page: <https://daten.stadt.sg.ch/explore/dataset/baeder-aktualisierung-der-webseite/table/?sort=fertigstellungszeit>
+- API endpoint: <https://daten.stadt.sg.ch/api/explore/v2.1/catalog/datasets/baeder-aktualisierung-der-webseite/records>
+
+## Features
+
+- Live API ingestion with pagination and deduplication
+- Filter by bath and date range
+- Latest status table per bath
+- Interactive trend and comparison charts
+- Raw data view for verification
+
+## Run locally
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+## Project layout
+
+- `app.py`: Streamlit UI and filtering logic
+- `data_source.py`: API client and data cleaning

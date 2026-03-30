@@ -1,140 +1,203 @@
-import streamlit as st
+from __future__ import annotations
+
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from datetime import datetime
-import time
-import os
+import plotly.express as px
 import requests
-import matplotlib.dates as mdates
-from calendar import month_name
+import streamlit as st
 
-st.title('Daily Temperature Tracker 3-Weieren')
+from data_source import DATASET_TABLE_URL, fetch_bath_data
 
-def load_temperature_data():
-    url = 'https://raw.githubusercontent.com/szeni23/runnerPublic/main/temperature_data.csv'
+st.set_page_config(
+    page_title="St.Gallen Bäder Dashboard",
+    layout="wide",
+)
+
+st.title("St.Gallen Bäder Dashboard")
+st.caption(
+    "Live data source: "
+    f"[Bäder Aktualisierung der Webseite]({DATASET_TABLE_URL})"
+)
+
+
+@st.cache_data(ttl=900, show_spinner=False)
+def load_data() -> pd.DataFrame:
+    return fetch_bath_data()
+
+
+with st.spinner("Loading latest bath data..."):
     try:
-        data = pd.read_csv(url, dayfirst=True)
-        data['Date'] = pd.to_datetime(data['Date'], format='%d.%m.%Y')
-        data = data.drop_duplicates(subset='Date', keep='first')
-        return data.sort_values(by='Date')
-    except Exception as e:
-        st.error(f"Error loading data: {e}")
-        return pd.DataFrame()
+        data = load_data()
+    except requests.RequestException as error:
+        st.error(f"Could not load data from the city dataset API: {error}")
+        st.stop()
 
-data = load_temperature_data()
+if data.empty:
+    st.warning("No data available from the source API.")
+    st.stop()
 
-if 'last_update' not in st.session_state or time.time() - st.session_state['last_update'] > 300:
-    st.session_state['last_update'] = time.time()
+all_baths = sorted(data["bath"].dropna().unique())
+date_min = data["date"].min().date()
+date_max = data["date"].max().date()
+
+st.sidebar.header("Filters")
+selected_baths = st.sidebar.multiselect(
+    "Baths",
+    options=all_baths,
+    default=all_baths,
+)
+
+date_range = st.sidebar.date_input(
+    "Date range",
+    value=(date_min, date_max),
+    min_value=date_min,
+    max_value=date_max,
+)
+
+include_missing_temperatures = st.sidebar.checkbox(
+    "Include rows without water temperature",
+    value=False,
+)
+
+if st.sidebar.button("Refresh data"):
+    st.cache_data.clear()
     st.rerun()
 
-if not data.empty:
-    sns.set_theme(style="whitegrid")
-    plt.figure(figsize=(10, 6))
-    
-    sns.lineplot(x='Date', y='Temp', data=data, marker='o', color='dodgerblue', label='Daily Temperature')
-    plt.fill_between(data['Date'], data['Temp'] - 1, data['Temp'] + 1, color='dodgerblue', alpha=0.3)
-    
-    today = datetime.now().date()
-    todays_data = data[data['Date'].dt.date == today]
-    if not todays_data.empty:
-        todays_temp = todays_data['Temp'].values[0]
-        st.subheader(f"Weather in St.Gallen:")
-        st.write(f"**Today's water temperature is:** {todays_temp} °C")
-    else:
-        st.markdown("**Today's water temperature is not available.**")
-
-    def fetch_weather_data(api_key, city):
-        base_url = "http://api.openweathermap.org/data/2.5/weather"
-        params = {
-            'q': city,
-            'appid': api_key,
-            'units': 'metric'
-        }
-        response = requests.get(base_url, params=params)
-        return response.json()
-    
-    city = 'St. Gallen'
-    api_key = os.getenv('OPENWEATHER_API_KEY')
-    if not api_key:
-        st.error('API key not found. Please set the OPENWEATHER_API_KEY environment variable.')
-        st.stop()
-        
-    weather_data = fetch_weather_data(api_key, city)
-    
-    if 'main' in weather_data:
-        st.write(f"**Temperature:** {weather_data['main']['temp']} °C")
-        st.write(f"**Weather:** {weather_data['weather'][0]['description']}")
-        st.write(f"**Humidity:** {weather_data['main']['humidity']}%")
-        st.write(f"**Wind Speed:** {weather_data['wind']['speed']} m/s")
-    else:
-        if 'message' in weather_data:
-            st.error(f"Error fetching weather data: {weather_data['message']}")
-        else:
-            st.error("Error fetching weather data. Please check your API key and the city name.")
-    
-    plt.title('Water Temperature Trend at 3-Weieren', fontsize=16)
-    plt.xlabel('Date', fontsize=14)
-    plt.ylabel('Temperature (°C)', fontsize=14)
-    ax = plt.gca()
-    locator = mdates.MonthLocator()
-    formatter = mdates.DateFormatter('%b %Y')
-    ax.xaxis.set_major_locator(locator)
-    ax.xaxis.set_major_formatter(formatter)
-    plt.xticks(rotation=45)
-    plt.ylim(0, 30)
-    plt.legend()
-    plt.tight_layout()
-    st.pyplot(plt)
-
-    window_size = 7
-    data['Moving Average'] = data['Temp'].rolling(window=window_size, min_periods=1).mean()
-    
-    plt.figure(figsize=(12, 6))
-    plt.plot(data['Date'], data['Temp'], marker='o', linestyle='', color='dodgerblue', label='Daily Temperature')
-    plt.plot(data['Date'], data['Moving Average'], color='red', label=f'{window_size}-Day Moving Average')
-    plt.title('Water Temperature Trend with Moving Average', fontsize=16)
-    plt.xlabel('Date', fontsize=14)
-    plt.ylabel('Temperature (°C)', fontsize=14)
-    ax = plt.gca()
-    locator = mdates.MonthLocator()
-    formatter = mdates.DateFormatter('%b %Y')
-    ax.xaxis.set_major_locator(locator)
-    ax.xaxis.set_major_formatter(formatter)
-    plt.xticks(rotation=45)
-    plt.ylim(0, 30)
-    plt.legend()
-    plt.tight_layout()
-    st.pyplot(plt)
-
-    month_names = list(month_name)[1:]
-    data['Month'] = pd.Categorical(data['Date'].dt.month_name(), categories=month_names, ordered=True)
-    data['Day'] = data['Date'].dt.day
-    heat_data = data.pivot_table(index='Month', columns='Day', values='Temp', aggfunc='mean')
-    
-    plt.figure(figsize=(20, 6))
-    sns.heatmap(heat_data, cmap='coolwarm', linewidths=.5, annot=True, fmt=".1f",
-                cbar_kws={'label': 'Temperature (°C)'}, vmin=0, vmax=30)
-    plt.title('Heat Map of Daily Water Temperatures by Month', fontsize=16)
-    plt.xlabel('Day of Month', fontsize=14)
-    plt.ylabel('Month', fontsize=14)
-    plt.yticks(rotation=0)
-    plt.tight_layout()
-    st.pyplot(plt)
+if isinstance(date_range, tuple) and len(date_range) == 2:
+    start_date, end_date = date_range
+elif isinstance(date_range, list) and len(date_range) == 2:
+    start_date, end_date = date_range
 else:
-    st.markdown("No data available to display.")
+    start_date, end_date = date_min, date_max
 
-latitude = 47.42163
-longitude = 9.386448
+if not selected_baths:
+    st.info("Select at least one bath in the sidebar.")
+    st.stop()
 
-data = pd.DataFrame({
-    'lat': [latitude],
-    'lon': [longitude]
-})
-st.map(data)
-    
-st.markdown(
-    "For more detailed information, visit "
-    "[Tagesaktuelle Öffnungszeiten und Temperaturen der Freibäder]"
-    "(https://www.sport.stadt.sg.ch/news/stsg_sport/2024/05/freibaeder--tagesaktuelle-oeffnungszeiten-und-temperaturen.html)."
+filtered = data[data["bath"].isin(selected_baths)].copy()
+filtered = filtered[(filtered["date"].dt.date >= start_date) & (filtered["date"].dt.date <= end_date)]
+
+if not include_missing_temperatures:
+    filtered = filtered[filtered["water_temperature_c"].notna()]
+
+if filtered.empty:
+    st.warning("No records match your filter settings.")
+    st.stop()
+
+latest_update = filtered["updated_at"].max()
+latest_update_local = latest_update.tz_convert("Europe/Zurich") if pd.notna(latest_update) else None
+
+latest_by_bath = (
+    filtered.sort_values(["bath", "date", "updated_at"], ascending=[True, False, False])
+    .drop_duplicates(subset=["bath"], keep="first")
+    .reset_index(drop=True)
 )
+latest_temps = latest_by_bath.dropna(subset=["water_temperature_c"]).copy()
+
+if latest_temps.empty:
+    warmest_label = "n/a"
+    warmest_value = "-"
+    mean_value = "-"
+else:
+    warmest_row = latest_temps.loc[latest_temps["water_temperature_c"].idxmax()]
+    warmest_label = warmest_row["bath"]
+    warmest_value = f"{warmest_row['water_temperature_c']:.1f} °C"
+    mean_value = f"{latest_temps['water_temperature_c'].mean():.1f} °C"
+
+metric_col1, metric_col2, metric_col3 = st.columns(3)
+metric_col1.metric("Latest dataset update", latest_update_local.strftime("%Y-%m-%d %H:%M") if latest_update_local else "n/a")
+metric_col2.metric("Warmest current bath", warmest_label, warmest_value)
+metric_col3.metric("Average current temperature", mean_value)
+
+st.subheader("Latest status by bath")
+status_table = latest_by_bath[
+    [
+        "bath",
+        "date",
+        "water_temperature_c",
+        "status",
+        "opening_time",
+        "closing_time",
+        "bath_bus",
+        "message",
+        "updated_at",
+    ]
+].copy()
+
+status_table = status_table.rename(
+    columns={
+        "bath": "Bath",
+        "date": "Date",
+        "water_temperature_c": "Water Temp (°C)",
+        "status": "Status",
+        "opening_time": "Opening",
+        "closing_time": "Closing",
+        "bath_bus": "Bäderbus",
+        "message": "Message",
+        "updated_at": "Updated",
+    }
+)
+status_table["Date"] = status_table["Date"].dt.strftime("%Y-%m-%d")
+status_table["Updated"] = status_table["Updated"].dt.tz_convert("Europe/Zurich").dt.strftime("%Y-%m-%d %H:%M")
+status_table["Water Temp (°C)"] = status_table["Water Temp (°C)"].map(
+    lambda value: f"{value:.1f}" if pd.notna(value) else ""
+)
+
+st.dataframe(status_table, hide_index=True, use_container_width=True)
+
+st.subheader("Temperature trend")
+chart_data = filtered.dropna(subset=["water_temperature_c"]).sort_values(["date", "bath"])
+
+if chart_data.empty:
+    st.info("No temperature values available for the selected filters.")
+else:
+    trend_fig = px.line(
+        chart_data,
+        x="date",
+        y="water_temperature_c",
+        color="bath",
+        markers=True,
+        labels={
+            "date": "Date",
+            "water_temperature_c": "Water Temperature (°C)",
+            "bath": "Bath",
+        },
+    )
+    trend_fig.update_layout(
+        hovermode="x unified",
+        legend_title_text="Bath",
+        margin=dict(l=20, r=20, t=30, b=20),
+    )
+    st.plotly_chart(trend_fig, use_container_width=True)
+
+if len(latest_temps) > 1:
+    st.subheader("Current temperature comparison")
+    comparison_fig = px.bar(
+        latest_temps.sort_values("water_temperature_c", ascending=False),
+        x="bath",
+        y="water_temperature_c",
+        color="bath",
+        labels={
+            "bath": "Bath",
+            "water_temperature_c": "Water Temperature (°C)",
+        },
+    )
+    comparison_fig.update_layout(showlegend=False, margin=dict(l=20, r=20, t=30, b=20))
+    st.plotly_chart(comparison_fig, use_container_width=True)
+
+with st.expander("Show filtered raw data"):
+    raw = filtered.sort_values(["date", "bath"])
+    raw = raw.rename(
+        columns={
+            "record_id": "Record ID",
+            "date": "Date",
+            "bath": "Bath",
+            "water_temperature_c": "Water Temp (°C)",
+            "status": "Status",
+            "opening_time": "Opening",
+            "closing_time": "Closing",
+            "bath_bus": "Bäderbus",
+            "message": "Message",
+            "updated_at": "Updated",
+        }
+    )
+    st.dataframe(raw, hide_index=True, use_container_width=True)
